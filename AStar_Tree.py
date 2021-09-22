@@ -1,5 +1,5 @@
 # Lab 05
-# A* Search Graph Implementation
+# A* Search Tree Implementation
 # By: Daniel Thai and Travis Chamness
 # Date: 09/22/21
 
@@ -13,8 +13,6 @@ startNode = None
 goalNode = None
 #Data structure that holds potential nodes for expansion
 fringe = []
-#Data structure that holds nodes which have already been visited
-visited = []
 #Upon reaching goal Path is populated with the path taken
 path = []
 #The cost of the path taken stored as an integer
@@ -134,7 +132,6 @@ def successor_function():
     global currentNode
     global fringe
     global ULDR
-    global visited
 
     for direction, moves in enumerate(ULDR):
         #If the move doesn't result in being on a wall
@@ -160,21 +157,6 @@ def successor_function():
                 child.cost = currentNode.cost
             currentNode.children.append(child)
             fringe.append(child)
-    #after finding all children of currentNode, place it in visited
-    visited.append(currentNode)
-
-#No change from UCS implementation
-def in_visited():
-    global visited
-    global currentNode
-
-    in_visited = False
-    for node in visited:
-        if currentNode.data == node.data:
-            in_visited = True
-        if in_visited:
-            break
-    return in_visited
 
 # No Change from UCS implementation
 def populate_path():
@@ -205,7 +187,7 @@ def main():
     while fringe:
         currentNode = lowestCostNode()
         goalFound = goalTest()
-        if not goalFound and not in_visited(): #reduced goalTest(currentNode) == False to logical equiv with not statement
+        if not goalFound: #reduced goalTest(currentNode) == False to logical equiv with not statement
             successor_function()
         elif goalFound:
             populate_path()
