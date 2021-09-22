@@ -29,12 +29,13 @@ ROBOT = 'R'
 DIAMOND = 'D'
 
 class node:
-    def __init__(self,parent,data,cost,children, forwardCost):
+    def __init__(self,parent,data,cost,children, forwardCost, move):
         self.parent = parent # Points to the parent node in the state chart
         self.data = data # Represents the [Row][Col] position of the node
         self.cost = cost # The cost as determined by the cumulative cost of the path taken to this tile on the maze
         self.forwardCost = forwardCost # The cost determined by the heuristic function
         self.children = [] # The children states of this  node
+        self.move = move # The move to get from the previous node to this node
 
 #Stolen from Lab 3
 def create_map():
@@ -89,9 +90,9 @@ def print_maze_id_start_goal(find_goal_start = False):
     for i, row in enumerate(maze):
         for j, val in enumerate(row):
             if val == ROBOT:
-                startNode = node(None,[i,j],0,None, None)
+                startNode = node(None,[i,j],0,None, None, None)
             elif val == DIAMOND:
-                goalNode = node(None, [i,j], 0, None, 0)
+                goalNode = node(None, [i,j], 0, None, 0, None)
             print(val, end=' ')
         print()
     if find_goal_start:
@@ -107,7 +108,7 @@ def lowestCostNode():
 
     nodeIndex = None
     maxCost = sys.maxsize #acts as the largest possible integer
-    smallestCostNode = node(None, None, 0, None, maxCost)
+    smallestCostNode = node(None, None, 0, None, maxCost, None)
     for index,iterNode in enumerate(fringe):
         if (iterNode.forwardCost + iterNode.cost) < (smallestCostNode.forwardCost + smallestCostNode.cost): # F(n) = G(n) + H(n) : A start algorithm
             smallestCostNode = iterNode
@@ -135,10 +136,20 @@ def successor_function():
     global ULDR
     global visited
 
-    for moves in ULDR:
+    for direction, moves in enumerate(ULDR):
         #If the move doesn't result in being on a wall
         if maze[currentNode.data[0]+moves[0]][currentNode.data[1] + moves[1]] != '-':
-            child = node(currentNode, [currentNode.data[0]+moves[0],currentNode.data[1] + moves[1]], None, None, None)
+            child = node(currentNode, [currentNode.data[0]+moves[0],currentNode.data[1] + moves[1]], None, None, None, None)
+            if direction == 0:
+                child.move = 'U'
+            elif direction == 1:
+                child.move = 'L'
+            elif direction == 2:
+                child.move = 'D'
+            elif direction == 3:
+                child.move = 'R'
+            else:
+                print("Invalid Direction")
             #Heuristic function call added to child creation process
             child = heuristic_function(child)
             # Robot and Diamond both account for 0 cost, but must be handled respecitively as 0 cost
@@ -173,7 +184,8 @@ def populate_path():
 
     pathCost = currentNode.cost
     while currentNode != None:
-        path.insert(0,currentNode.data)
+        if currentNode.move != None:
+            path.insert(0,currentNode.move)
         currentNode = currentNode.parent
 
 # Heuristic Function:
