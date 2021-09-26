@@ -200,7 +200,6 @@ def main():
     global fringe
     global currentNode
     global path
-    goalFound = False
     initialization()
     while fringe:
         currentNode = lowestCostNode()

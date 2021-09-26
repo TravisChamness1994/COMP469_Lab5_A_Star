@@ -187,7 +187,7 @@ def main():
     while fringe:
         currentNode = lowestCostNode()
         goalFound = goalTest()
-        if not goalFound: #reduced goalTest(currentNode) == False to logical equiv with not statement
+        if not goalFound:
             successor_function()
         elif goalFound:
             populate_path()
