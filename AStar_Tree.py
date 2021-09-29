@@ -98,14 +98,13 @@ def print_maze_id_start_goal(find_goal_start = False):
     else:
         return ""  # effectively return nothing
 
-
+# Determine lowest cost node available in fringe and return current node, if no smaller node exists, or the new smallest node.
 def lowestCostNode():
-    '''This will pick the lowest cost node from the fringe '''
     global fringe
     global currentNode
 
     nodeIndex = None
-    maxCost = sys.maxsize #acts as the largest possible integer
+    maxCost = sys.maxsize
     smallestCostNode = node(None, None, 0, None, maxCost, None)
     for index,iterNode in enumerate(fringe):
         if (iterNode.forwardCost + iterNode.cost) < (smallestCostNode.forwardCost + smallestCostNode.cost): # F(n) = G(n) + H(n) : A start algorithm
@@ -118,6 +117,7 @@ def lowestCostNode():
     else:
         fringe.pop(nodeIndex)
         return smallestCostNode
+
 
 def goalTest():
     global goalNode
@@ -158,7 +158,7 @@ def successor_function():
             currentNode.children.append(child)
             fringe.append(child)
 
-# No Change from UCS implementation
+#Populate path derived from algorithm
 def populate_path():
     global currentNode
     global pathCost
@@ -174,6 +174,7 @@ def populate_path():
 # Calculates manhattan distance from a node to the goal node.
 def heuristic_function(node):
     global goalNode
+    # F(n) = G(n) + H(n) : A* algorithm
     node.forwardCost = abs(goalNode.data[0] - node.data[0]) + abs(goalNode.data[1] - node.data[1])
     return node
 

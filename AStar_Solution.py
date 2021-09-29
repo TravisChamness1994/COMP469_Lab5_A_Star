@@ -19,10 +19,13 @@ visited = []
 path = []
 #The cost of the path taken stored as an integer
 pathCost = None
+#Stolen from Lab 4 - Credit to Daniel Ramirez
 #The pattern of movements: Up, Down, Left, then Right
 ULDR  = [[-1,0],[0,-1],[1,0],[0,1]]
 #The node currently being expanded
 currentNode = None
+#Selection of Graph or Tree implementation
+SELECTION = 0
 #Literal R representing Robot in Initial Maze
 ROBOT = 'R'
 #Literal D representing Diamond in Initial Maze
@@ -37,7 +40,6 @@ class node:
         self.children = [] # The children states of this  node
         self.move = move # The move to get from the previous node to this node
 
-#Stolen from Lab 3
 def create_map():
     # map_name = input("Enter map name(try \"mazeMap.txt\"): ")
     map_name = "labGivenMaze.txt"
@@ -98,26 +100,29 @@ def print_maze_id_start_goal(find_goal_start = False):
     if find_goal_start:
         return startNode, goalNode #returns the goal and start node if requested by user via parameter
     else:
-        return ""  # effectively return nothing
+        return ""  #effectively return nothing
 
-
+# Determine lowest cost node available in fringe and return current node, if no smaller node exists, or the new smallest node.
 def lowestCostNode():
-    '''This will pick the lowest cost node from the fringe '''
     global fringe
     global currentNode
 
     nodeIndex = None
-    maxCost = sys.maxsize #acts as the largest possible integer
+    maxCost = sys.maxsize 
     smallestCostNode = node(None, None, 0, None, maxCost, None)
     for index,iterNode in enumerate(fringe):
-        if (iterNode.forwardCost + iterNode.cost) < (smallestCostNode.forwardCost + smallestCostNode.cost): # F(n) = G(n) + H(n) : A start algorithm
+        # F(n) = G(n) + H(n) : A* algorithm - if f(n) of iternode < f(n) for current smallest cost node
+        if (iterNode.forwardCost + iterNode.cost) < (smallestCostNode.forwardCost + smallestCostNode.cost): 
+            #update the smallest node to the iterNode
             smallestCostNode = iterNode
+            #Store the index for removal from fringe
             nodeIndex = index
 
     if(smallestCostNode.forwardCost == maxCost):
-        print("All nodes left have been visited")
+        #All nodes left have been visited
         return currentNode
     else:
+        #Pop the node ID'd in the f(n) comparison for loop from fringe and return it
         fringe.pop(nodeIndex)
         return smallestCostNode
 
@@ -160,10 +165,10 @@ def successor_function():
                 child.cost = currentNode.cost
             currentNode.children.append(child)
             fringe.append(child)
-    #after finding all children of currentNode, place it in visited
-    visited.append(currentNode)
+    #after finding all children of currentNode, place it in visited if Graph Implementation Selected
+    if SELECTION == 1:
+        visited.append(currentNode)
 
-#No change from UCS implementation
 def in_visited():
     global visited
     global currentNode
@@ -192,10 +197,11 @@ def populate_path():
 # Calculates manhattan distance from a node to the goal node.
 def heuristic_function(node):
     global goalNode
+    # F(n) = G(n) + H(n) : A* algorithm
     node.forwardCost = abs(goalNode.data[0] - node.data[0]) + abs(goalNode.data[1] - node.data[1])
     return node
 
-def main():
+def a_star_solution():
     global currentNode
     global fringe
     global currentNode
@@ -204,8 +210,11 @@ def main():
     while fringe:
         currentNode = lowestCostNode()
         goalFound = goalTest()
-        if not goalFound and not in_visited(): #reduced goalTest(currentNode) == False to logical equiv with not statement
-            successor_function()
+        if not goalFound:
+            if SELECTION == 1 and not in_visited(): 
+                successor_function()    
+            elif SELECTION == 2:
+                successor_function()
         elif goalFound:
             populate_path()
             break
@@ -213,4 +222,12 @@ def main():
     print("Cost of Plan:",pathCost)
     return path, pathCost
 
-main()
+def solution_host():
+    global SELECTION
+
+    while SELECTION != 1 and SELECTION != 2:
+        SELECTION = int(input("Seletion Menu for A* Implementation \nSelect either 1 or 2 for corresponding implementations \n1: GRAPH Implementation \n2: Tree Implementation\n"))
+    a_star_solution()
+
+    
+solution_host()
